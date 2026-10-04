@@ -413,6 +413,7 @@ class CPWHOrderAutomator:
     # -----------------------------------------------------------------
         self.header_mgr = FixedHeaderManager(self.root, title="GFH Accessories Ordering")
         self.header_mgr.add_theme_toggle(self.theme_manager, callback=self._apply_theme)
+        self.header_mgr.add_copyright(self.theme_manager)
         # FixedHeaderManager now tags ALL its own widgets with _tag="header"
         # in __init__/add_theme_toggle/add_copyright, so no manual tagging needed.
         try:
@@ -1441,7 +1442,7 @@ EMBEDDED_LOGO_B64 = open(os.path.join(os.path.dirname(os.path.abspath(__file__))
 EMBEDDED_ICON_B64 = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "embedded_icon_b64.txt"), "r").read().strip() if not getattr(sys, "frozen", False) else open(os.path.join(getattr(sys, "_MEIPASS", "."), "assets", "embedded_icon_b64.txt"), "r").read().strip()
 
 NAVY_2 = "#050817"
-RED = "#f0541c"
+RED = "#e83030"
 TEXT = "#111827"
 MUTED = "#6B7280"
 BORDER = "#D7DAE2"
@@ -1721,6 +1722,7 @@ class GFHAccessoriesAutomationGUI:
         # and theme toggle button were all missing.
         self.header_mgr = FixedHeaderManager(self.root, title="GFH Accessories Ordering")
         self.header_mgr.add_theme_toggle(self.theme_manager, callback=self._apply_theme)
+        self.header_mgr.add_copyright(self.theme_manager)
         if self.logo_source:
             self.header_mgr.set_logo(logo_path=self.logo_source, text="GFH")
         else:
@@ -1858,11 +1860,11 @@ class GFHAccessoriesAutomationGUI:
 
         btns = tk.Frame(parent, bg=WHITE)
         btns.pack(fill=tk.X, pady=(10, 0))
-        self.selected_count_label = tk.Label(btns, text="0 stores selected", bg=WHITE, fg="#f0541c", font=("Segoe UI", 9, "bold"))
+        self.selected_count_label = tk.Label(btns, text="0 stores selected", bg=WHITE, fg="#e83030", font=("Segoe UI", 9, "bold"))
         self.selected_count_label.pack(side=tk.LEFT)
         
-        tk.Button(btns, text="Manage Stores", command=self.manage_stores_ui, bg=WHITE, fg="#f0541c", relief=tk.SOLID, bd=1, padx=10).pack(side=tk.LEFT, padx=(15, 0))
-        tk.Button(btns, text="Select All", command=self.select_all_visible, bg=WHITE, fg="#f0541c", relief=tk.SOLID, bd=1, padx=10).pack(side=tk.RIGHT, padx=(6, 0))
+        tk.Button(btns, text="Manage Stores", command=self.manage_stores_ui, bg=WHITE, fg="#e83030", relief=tk.SOLID, bd=1, padx=10).pack(side=tk.LEFT, padx=(15, 0))
+        tk.Button(btns, text="Select All", command=self.select_all_visible, bg=WHITE, fg="#e83030", relief=tk.SOLID, bd=1, padx=10).pack(side=tk.RIGHT, padx=(6, 0))
         tk.Button(btns, text="Clear All", command=self.clear_all_stores, bg=WHITE, fg=RED, relief=tk.SOLID, bd=1, padx=10).pack(side=tk.RIGHT)
 
     def manage_stores_ui(self):
@@ -1997,7 +1999,7 @@ class GFHAccessoriesAutomationGUI:
 
         tools = tk.Frame(parent, bg=WHITE)
         tools.pack(fill=tk.X, pady=(10, 0))
-        self.files_assigned_label = tk.Label(tools, text="0 of 0 files assigned", bg=WHITE, fg="#f0541c", font=("Segoe UI", 9, "bold"))
+        self.files_assigned_label = tk.Label(tools, text="0 of 0 files assigned", bg=WHITE, fg="#e83030", font=("Segoe UI", 9, "bold"))
         self.files_assigned_label.pack(side=tk.LEFT)
         tk.Button(tools, text="Browse Selected", command=self.browse_selected_file, bg=WHITE, fg=NAVY, relief=tk.SOLID, bd=1, padx=10).pack(side=tk.RIGHT, padx=(6, 0))
         tk.Button(tools, text="Use One File For All", command=self.browse_one_for_all, bg=WHITE, fg=NAVY, relief=tk.SOLID, bd=1, padx=10).pack(side=tk.RIGHT)
@@ -2084,7 +2086,7 @@ class GFHAccessoriesAutomationGUI:
         bar = tk.Frame(parent, bg=WHITE)
         bar.pack(fill=tk.X, pady=(10, 0))
         tk.Button(bar, text="Clear Log", command=self.clear_log, bg=WHITE, fg=RED, relief=tk.SOLID, bd=1, padx=10).pack(side=tk.LEFT)
-        tk.Button(bar, text="Save Log", command=self.save_log, bg=WHITE, fg="#f0541c", relief=tk.SOLID, bd=1, padx=10).pack(side=tk.RIGHT)
+        tk.Button(bar, text="Save Log", command=self.save_log, bg=WHITE, fg="#e83030", relief=tk.SOLID, bd=1, padx=10).pack(side=tk.RIGHT)
 
     def build_summary(self, parent):
         parent.grid_columnconfigure(0, weight=1)
@@ -2105,7 +2107,7 @@ class GFHAccessoriesAutomationGUI:
             frame = tk.Frame(parent, bg="#FAFBFD", highlightbackground="#E6E8EE", highlightthickness=1)
             frame.grid(row=r, column=c, sticky="nsew", padx=(0 if c == 0 else 8, 0), pady=(0 if r == 0 else 8, 8))
             tk.Label(frame, text=label, bg="#FAFBFD", fg=TEXT, font=("Segoe UI", 9)).pack(anchor="w", padx=12, pady=(10, 0))
-            tk.Label(frame, textvariable=self.summary_vars[key], bg="#FAFBFD", fg="#f0541c", font=("Segoe UI", 21, "bold")).pack(anchor="w", padx=12, pady=(3, 8))
+            tk.Label(frame, textvariable=self.summary_vars[key], bg="#FAFBFD", fg="#e83030", font=("Segoe UI", 21, "bold")).pack(anchor="w", padx=12, pady=(3, 8))
         tk.Label(parent, text="Overall Progress", bg=WHITE, fg=TEXT, font=("Segoe UI", 9, "bold")).grid(row=2, column=0, sticky="w", pady=(6, 2))
         self.percent_label = tk.Label(parent, text="0%", bg=WHITE, fg=TEXT, font=("Segoe UI", 9, "bold"))
         self.percent_label.grid(row=2, column=1, sticky="e", pady=(6, 2))
