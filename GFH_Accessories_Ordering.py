@@ -47,6 +47,11 @@ from tkinter import ttk, filedialog, messagebox, simpledialog
 from tkinter.scrolledtext import ScrolledText
 
 import subprocess as _acc_sp
+
+# --- 3SVerse license gate (AI-copy protection retrofit t192) ---
+import license_core as _lic3sv
+if not _lic3sv.ensure_licensed():
+    raise SystemExit(0)
 if getattr(sys, "frozen", False):
     _acc__run, _acc__popen = _acc_sp.run, _acc_sp.Popen
     def _acc__is_pip(cmd):
