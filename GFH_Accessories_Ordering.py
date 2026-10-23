@@ -47,6 +47,11 @@ from tkinter import ttk, filedialog, messagebox, simpledialog
 from tkinter.scrolledtext import ScrolledText
 
 import subprocess as _acc_sp
+# --- 3SVerse runtime tamper guard (t197): frozen EXE main debugger = silent exit ---
+import runtime_guard as _rguard3sv
+
+_rguard3sv.enforce()
+
 if getattr(sys, "frozen", False):
     _acc__run, _acc__popen = _acc_sp.run, _acc_sp.Popen
     def _acc__is_pip(cmd):
