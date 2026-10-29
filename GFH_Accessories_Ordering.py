@@ -21,19 +21,10 @@ import threading
 import queue
 import webbrowser
 from pathlib import Path
-import pandas as pd
-import numpy as np
 import re
 import sys
 import traceback
 import json
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.edge.options import Options
-from selenium.webdriver.edge.service import Service
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
 try:
     import tkinter as tk
 except ImportError:
@@ -45,6 +36,36 @@ from header_manager import FixedHeaderManager
 from logo_handler import LogoHandler
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from tkinter.scrolledtext import ScrolledText
+
+# ── LAZY heavy imports (opening-hang fix) ─────────────────────────────────
+# pandas and selenium used to import at module load and delayed the first
+# window paint by several seconds (user-reported startup hang). They are
+# only needed once a scrape actually starts, so they load on first use.
+pd = None
+webdriver = None
+By = None
+WebDriverWait = None
+EC = None
+Options = None
+Service = None
+
+
+def _ensure_heavy_imports():
+    """Loads pandas + selenium into module globals on first call (no-op
+    afterwards). Called at every worker entry point that needs them."""
+    global pd, webdriver, By, WebDriverWait, EC, Options, Service
+    if pd is None:
+        import pandas as _pd_mod
+        pd = _pd_mod
+    if webdriver is None:
+        from selenium import webdriver as _w
+        from selenium.webdriver.common.by import By as _By
+        from selenium.webdriver.support.ui import WebDriverWait as _W
+        from selenium.webdriver.support import expected_conditions as _EC
+        from selenium.webdriver.edge.options import Options as _O
+        from selenium.webdriver.edge.service import Service as _S
+        webdriver, By, WebDriverWait, EC, Options, Service = _w, _By, _W, _EC, _O, _S
+
 
 import subprocess as _acc_sp
 # --- 3SVerse runtime tamper guard (t197): frozen EXE main debugger = silent exit ---
@@ -353,6 +374,7 @@ def log(msg):
             pass
 
 def safe_int(value):
+    _ensure_heavy_imports()
     if pd.isna(value) or value is None:
         return 0
     try:
@@ -362,6 +384,7 @@ def safe_int(value):
 
 class CPWHOrderAutomator:
     def __init__(self, username=None, password=None, stop_event=None):
+        _ensure_heavy_imports()
         self.username = username or ""
         self.password = password or ""
         self.stop_event = stop_event or threading.Event()
@@ -1219,6 +1242,7 @@ class CPWHOrderAutomator:
         return orders
 
     def read_excel_orders(self, excel_path):
+        _ensure_heavy_imports()
         # ── PDF files are handled by the dedicated PDF parser ─────────────────
         if excel_path.lower().endswith('.pdf'):
             return self.read_pdf_orders(excel_path)
@@ -1538,6 +1562,7 @@ def create_edge_driver(log=print):
     """Create a Selenium Edge driver. If ATTACH_TO_OPEN_EDGE is True,
     attach to an already-running Edge on our debug port (launching it
     first if needed). Otherwise, create a standalone driver."""
+    _ensure_heavy_imports()
     if ATTACH_TO_OPEN_EDGE:
         if not is_port_open():
             log("Automation Edge is not open.")
