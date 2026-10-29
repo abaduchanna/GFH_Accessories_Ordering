@@ -2337,6 +2337,18 @@ def _enable_dpi_awareness() -> None:
         pass
 
 
+def _close_pyi_splash():
+    """Close the PyInstaller splash screen (frozen onefile builds only).
+
+    Called once the main window is fully built and shown; harmless no-op
+    in dev runs (pyi_splash only exists inside PyInstaller builds)."""
+    try:
+        import pyi_splash  # type: ignore
+        pyi_splash.close()
+    except Exception:
+        pass
+
+
 if __name__ == "__main__":
     import multiprocessing
     multiprocessing.freeze_support()
@@ -2352,6 +2364,7 @@ if __name__ == "__main__":
     _enable_dpi_awareness()
     try:
         app = GFHAccessoriesAutomationGUI()
+        _close_pyi_splash()
         app.run()
     except Exception:
         traceback.print_exc()
