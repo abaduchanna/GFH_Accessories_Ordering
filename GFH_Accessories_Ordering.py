@@ -105,35 +105,12 @@ try:
     _HAS_PDFPLUMBER = True
 except ImportError:
     _HAS_PDFPLUMBER = False
-    # Try to auto-install pdfplumber silently
-    try:
-        import subprocess as _sp
-        _sp.run(
-            [sys.executable, "-m", "pip", "install", "pdfplumber", "--quiet",
-             "--disable-pip-version-check"],
-            capture_output=True, timeout=120,
-        )
-        import pdfplumber as _pdfplumber
-        _HAS_PDFPLUMBER = True
-    except Exception:
-        pass
 
 try:
     from pypdf import PdfReader as _PdfReader
     _HAS_PYPDF = True
 except ImportError:
     _HAS_PYPDF = False
-    try:
-        import subprocess as _sp
-        _sp.run(
-            [sys.executable, "-m", "pip", "install", "pypdf", "--quiet",
-             "--disable-pip-version-check"],
-            capture_output=True, timeout=120,
-        )
-        from pypdf import PdfReader as _PdfReader
-        _HAS_PYPDF = True
-    except Exception:
-        pass
 
 # -------------------------------------------------------------------
 # HARDCODED PRODUCT DATABASE
@@ -436,20 +413,6 @@ class CPWHOrderAutomator:
         ]
         self.cable_charger_url = "https://www.cpwhwireless.com/latest-models?model=CABLE+CHARGER+POWERBANK&a=4"
 
-    # -----------------------------------------------------------------
-    # Helper methods
-    # -----------------------------------------------------------------
-        self.header_mgr = FixedHeaderManager(self.root, title="GFH Accessories Ordering")
-        self.header_mgr.add_theme_toggle(self.theme_manager, callback=self._apply_theme)
-        self.header_mgr.add_copyright(self.theme_manager)
-        # FixedHeaderManager now tags ALL its own widgets with _tag="header"
-        # in __init__/add_theme_toggle/add_copyright, so no manual tagging needed.
-        try:
-            _lp = _resource_path("GFH_Telecom_Logo.png") if "_resource_path" in dir() else os.path.join(os.path.dirname(os.path.abspath(__file__)), "GFH_Telecom_Logo.png")
-            if os.path.exists(_lp):
-                self.header_mgr.set_logo(logo_path=_lp, text="GFH")
-        except Exception:
-            pass
     def handle_alerts(self, wait_time=0.5):
         try:
             WebDriverWait(self.driver, wait_time).until(EC.alert_is_present())
@@ -1590,6 +1553,17 @@ def create_edge_driver(log=print):
     options.page_load_strategy = 'eager'
     driver = webdriver.Edge(options=options)
     return driver
+
+
+def _maximize_window(window):
+    try:
+        if window.winfo_exists():
+            window.state("zoomed")
+    except Exception:
+        try:
+            window.attributes("-zoomed", True)
+        except Exception:
+            pass
 
 
 class GFHAccessoriesAutomationGUI:
