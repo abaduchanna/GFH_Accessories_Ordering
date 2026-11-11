@@ -17,6 +17,7 @@ jobs:
       matrix:
         app:
           - GFH_Accessories_Ordering
+          - GFH_Accessories_Ordering_Qt
 
     steps:
       - name: Checkout
