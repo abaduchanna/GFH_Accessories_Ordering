@@ -1642,6 +1642,56 @@ class MainWindow(QMainWindow):
             self.header_mgr.set_logo(logo_path=logo_path, text="GFH")
         self.header_mgr.add_theme_toggle(self.theme_manager, callback=self._apply_theme)
 
+        # Tk's left navy sidebar (decorative nav list - only "Dashboard" is
+        # ever an active page; "Store Selection"/"Excel Files"/"Credentials"/
+        # "Run Automation"/"Logs" have no click handlers in the Tk source
+        # either, so this is a static visual element, not real navigation.
+        # It was missing entirely from the Qt port.
+        body_outer = QWidget()
+        body_outer_layout = QHBoxLayout(body_outer)
+        body_outer_layout.setContentsMargins(0, 0, 0, 0)
+        body_outer_layout.setSpacing(0)
+        outer.addWidget(body_outer, 1)
+
+        NAVY_2 = "#050817"
+        SIDEBAR_RED = "#e83030"
+        sidebar = QWidget()
+        sidebar.setFixedWidth(220)
+        sidebar.setStyleSheet(f"background: {NAVY_2};")
+        sidebar_layout = QVBoxLayout(sidebar)
+        sidebar_layout.setContentsMargins(8, 14, 8, 0)
+        sidebar_layout.setSpacing(3)
+        for label, active in (
+            ("Dashboard", True), ("Store Selection", False), ("Excel Files", False),
+            ("Credentials", False), ("Run Automation", False), ("Logs", False),
+        ):
+            row = QWidget()
+            row.setFixedHeight(52)
+            row.setStyleSheet(f"background: {'#1B244D' if active else NAVY_2};")
+            row_layout = QHBoxLayout(row)
+            row_layout.setContentsMargins(0, 0, 14, 0)
+            bar = QWidget()
+            bar.setFixedWidth(4)
+            bar.setStyleSheet(f"background: {SIDEBAR_RED if active else 'transparent'};")
+            row_layout.addWidget(bar)
+            lbl = QLabel(label)
+            lbl.setStyleSheet(
+                f"color: #ffffff; padding-left: 10px; "
+                f"font-weight: {'bold' if active else 'normal'};"
+            )
+            row_layout.addWidget(lbl, 1)
+            sidebar_layout.addWidget(row)
+        sidebar_layout.addStretch(1)
+        footer_line = QFrame()
+        footer_line.setFixedHeight(1)
+        footer_line.setStyleSheet("background: #283052;")
+        sidebar_layout.addWidget(footer_line)
+        for label in ("About", "Settings"):
+            lbl = QLabel(label)
+            lbl.setStyleSheet("color: #ffffff; padding: 8px 20px;")
+            sidebar_layout.insertWidget(sidebar_layout.count(), lbl)
+        body_outer_layout.addWidget(sidebar)
+
         body = QWidget()
         body_layout = QGridLayout(body)
         body_layout.setContentsMargins(16, 16, 16, 16)
@@ -1650,7 +1700,7 @@ class MainWindow(QMainWindow):
         body_layout.setColumnStretch(2, 4)
         body_layout.setRowStretch(0, 1)
         body_layout.setRowStretch(1, 1)
-        outer.addWidget(body, 1)
+        body_outer_layout.addWidget(body, 1)
 
         # 1. Store Selection
         store_box = QGroupBox("1. Store Selection")
