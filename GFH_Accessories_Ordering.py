@@ -105,6 +105,89 @@ try:
     _HAS_PDFPLUMBER = True
 except ImportError:
     _HAS_PDFPLUMBER = False
+    # Auto-install pdfplumber behind a small branded splash with a live bar,
+    # so the user sees progress instead of a silent freeze (source runs only;
+    # inside a frozen EXE the pip guard above makes this a no-op).
+    try:
+        import tkinter as _tk
+        from tkinter import ttk as _ttk
+        _splash_ok = True
+        try:
+            _splash = _tk.Tk()
+            _splash.title("GFH Accessories Ordering — Installing pdfplumber")
+            _splash.geometry("560x150")
+            _splash.resizable(False, False)
+            try:
+                _splash.configure(bg="#090d26")
+            except Exception:
+                pass
+            try:
+                _icon_path = next((os.path.join(os.path.dirname(os.path.abspath(__file__)), n)
+                                   for n in ("GFH_icon.ico", "gfh_icon.ico")
+                                   if os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), n))), None)
+                if _icon_path:
+                    _splash.iconbitmap(_icon_path)
+            except Exception:
+                pass
+            _splash_lbl = _tk.Label(
+                _splash,
+                text="Installing: pdfplumber (PDF reading support)\n"
+                     "Please wait — this runs once only…",
+                font=("Segoe UI", 11), pady=12, bg="#090d26", fg="#FFFFFF",
+            )
+            _splash_lbl.pack()
+            _splash_style = _ttk.Style(_splash)
+            _splash_style.theme_use("clam")
+            _splash_style.configure("GFH.Splash.TProgressbar", troughcolor="#20294a",
+                                    background="#e83030", bordercolor="#20294a",
+                                    lightcolor="#e83030", darkcolor="#e83030", thickness=8)
+            _splash_bar = _ttk.Progressbar(_splash, mode="indeterminate", length=500,
+                                           style="GFH.Splash.TProgressbar")
+            _splash_bar.pack(pady=(0, 12))
+            _splash_bar.start(12)
+            _splash.update()
+        except Exception:
+            _splash_ok = False
+
+        _pdf_result = {"success": False, "error": None}
+
+        def _pdf_install():
+            try:
+                _r = _acc_sp.run(
+                    [sys.executable, "-m", "pip", "install", "pdfplumber", "--quiet",
+                     "--disable-pip-version-check"],
+                    capture_output=True, timeout=120,
+                )
+                _pdf_result["success"] = _r.returncode == 0
+                _pdf_result["error"] = (_r.stderr or _r.stdout or "")[-400:]
+            except Exception as _exc:
+                _pdf_result["error"] = str(_exc)
+
+        _pdf_thread = threading.Thread(target=_pdf_install, daemon=True)
+        _pdf_thread.start()
+        if _splash_ok:
+            def _pdf_poll():
+                if _pdf_thread.is_alive():
+                    _splash.after(100, _pdf_poll)
+                    return
+                try:
+                    _splash_bar.stop()
+                    _splash_bar.configure(mode="determinate", value=100)
+                    _splash_lbl.config(text="pdfplumber ready — starting the app…")
+                    _splash.update()
+                    _splash.after(700, _splash.destroy)
+                except Exception:
+                    pass
+            _splash.protocol("WM_DELETE_WINDOW", lambda: None)
+            _splash.after(100, _pdf_poll)
+            _splash.mainloop()
+        else:
+            _pdf_thread.join()
+        if _pdf_result["success"]:
+            import pdfplumber as _pdfplumber
+            _HAS_PDFPLUMBER = True
+    except Exception:
+        pass
 
 try:
     from pypdf import PdfReader as _PdfReader
